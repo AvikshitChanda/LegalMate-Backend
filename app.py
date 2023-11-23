@@ -85,7 +85,7 @@ def on_click_callback():
 
 initialize_session_state()
 
-st.title("Hello Custom CSS Chatbot 🤖")
+st.title("Hello I am here to give you legal advice ⚖️")
 
 chat_placeholder = st.container()
 prompt_placeholder = st.form("chat-form")
