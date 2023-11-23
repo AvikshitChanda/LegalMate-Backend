@@ -92,7 +92,7 @@ prompt_placeholder = st.form("chat-form")
 
 with chat_placeholder:
     for chat in st.session_state.history:
-        st.markdown(f"From {chat.origin} : {chat:message}")
+        st.markdown(f"From {chat.origin} : {chat.message}")
 
 with prompt_placeholder:
     st.markdown("**Chat**")
