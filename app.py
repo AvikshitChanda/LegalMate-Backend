@@ -83,7 +83,6 @@ def on_click_callback():
     )
 
 
-
 initialize_session_state()
 
 st.title("Hello Custom CSS Chatbot 🤖")
