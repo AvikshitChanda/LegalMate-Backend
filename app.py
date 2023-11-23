@@ -22,12 +22,6 @@ class Message:
     message: str
 
 
-def load_css():
-    with open("static/styles.css", "r") as f:
-        css = f"<style>{f.read()}</style>"
-        st.markdown(css, unsafe_allow_html=True)
-
-
 def download_hugging_face_embeddings():
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
     return embeddings
@@ -89,7 +83,7 @@ def on_click_callback():
     )
 
 
-load_css()
+
 initialize_session_state()
 
 st.title("Hello Custom CSS Chatbot 🤖")
@@ -99,23 +93,7 @@ prompt_placeholder = st.form("chat-form")
 
 with chat_placeholder:
     for chat in st.session_state.history:
-        div = f"""
-    <div class="chat-row 
-        {'' if chat.origin == 'ai' else 'row-reverse'}">
-        <img class="chat-icon" src="app/static/{
-        'ai_icon.png' if chat.origin == 'ai'
-        else 'user_icon.png'}"
-             width=32 height=32>
-        <div class="chat-bubble
-        {'ai-bubble' if chat.origin == 'ai' else 'human-bubble'}">
-            &#8203;{chat.message}
-        </div>
-    </div>
-            """
-        st.markdown(div, unsafe_allow_html=True)
-
-    for _ in range(3):
-        st.markdown("")
+        st.markdown(f"From {chat.origin} : {chat:message}")
 
 with prompt_placeholder:
     st.markdown("**Chat**")
@@ -132,26 +110,3 @@ with prompt_placeholder:
         on_click=on_click_callback,
     )
 
-components.html("""
-<script>
-const streamlitDoc = window.parent.document;
-
-const buttons = Array.from(
-    streamlitDoc.querySelectorAll('.stButton > button')
-);
-const submitButton = buttons.find(
-    el => el.innerText === 'Submit'
-);
-
-streamlitDoc.addEventListener('keydown', function(e) {
-    switch (e.key) {
-        case 'Enter':
-            submitButton.click();
-            break;
-    }
-});
-</script>
-""",
-                height=0,
-                width=0,
-                )
