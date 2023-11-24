@@ -10,15 +10,17 @@ from langchain.vectorstores import Pinecone
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 import streamlit.components.v1 as components
+import time
 
 HUGGINGFACEHUB_API_TOKEN = st.secrets['HUGGINGFACEHUB_API_TOKEN']
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
+speed = 10
 
 
 @dataclass
 class Message:
     """Class for keeping track of a chat message."""
-    origin: Literal["human", "ai"]
+    origin: Literal["👤 Human", "👨🏻‍⚖️ Ai"]
     message: str
 
 
@@ -74,12 +76,11 @@ def on_click_callback():
         human_prompt
     )
     llm_response = response['result']
-    print(llm_response)
     st.session_state.history.append(
-        Message("human", human_prompt)
+        Message("👤 human", human_prompt)
     )
     st.session_state.history.append(
-        Message("ai", llm_response)
+        Message("👨🏻‍⚖️ ai", llm_response)
     )
 
 
@@ -90,36 +91,28 @@ st.title("LegalEase Advisor Chatbot 🇮🇳")
 st.markdown(
     """
     👋 **Namaste! Welcome to LegalEase Advisor!**
-
     I'm here to assist you with your legal queries within the framework of Indian law. Whether you're navigating through specific legal issues or seeking general advice, I'm here to help.
-
     📚 **How I Can Assist:**
     - Answer questions on various aspects of Indian law.
     - Guide you through legal processes relevant to India.
     - Provide information on your rights and responsibilities as per Indian legal standards.
-
     🔐 **Privacy & Security:**
     Rest assured, your privacy is of utmost importance. All interactions are confidential and secure. No personal details are stored unless you choose to create an account.
-
     ⚖️ **Disclaimer:**
     While I can provide general information, it's essential to consult with a qualified Indian attorney for advice tailored to your specific situation.
-
     🤖 **Getting Started:**
     Feel free to ask any legal question related to Indian law, using keywords like "property rights," "labor laws," or "family law." I'm here to assist you!
-    
+
     Let's get started! How can I assist you today?
     """
 )
-
-
-
 
 chat_placeholder = st.container()
 prompt_placeholder = st.form("chat-form")
 
 with chat_placeholder:
     for chat in st.session_state.history:
-        st.markdown(f"From {chat.origin} : {chat.message}")
+        st.markdown(f"{chat.origin} : {chat.message}")
 
 with prompt_placeholder:
     st.markdown("**Chat**")
@@ -134,4 +127,3 @@ with prompt_placeholder:
         type="primary",
         on_click=on_click_callback,
     )
-
