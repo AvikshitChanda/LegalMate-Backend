@@ -107,6 +107,7 @@ st.markdown(
     🤖 **Getting Started:**
     Feel free to ask any legal question related to Indian law, using keywords like "property rights," "labor laws," or "family law." I'm here to assist you!
     
+    Let's get started! How can I assist you today?
     """
 )
 
@@ -125,7 +126,6 @@ with prompt_placeholder:
     cols = st.columns((6, 1))
     cols[0].text_input(
         "Chat",
-        value="Let's get started! How can I assist you today?",
         label_visibility="collapsed",
         key="human_prompt",
     )
