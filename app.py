@@ -85,7 +85,7 @@ def on_click_callback():
 
 initialize_session_state()
 
-st.title("👋 Welcome to LegalEase Advisor! \n I'm here to help you navigate through legal questions and concerns. Whether you're seeking information about a specific legal topic or need general advice, I'm at your service.")
+st.title("👋 Namaste! Welcome to LegalEase Advisor! \n I'm here to assist you with your legal queries within the framework of Indian law. Whether you're navigating through specific legal issues or seeking general advice, I'm here to help. \n 📚 How I Can Assist: \n • Answer questions on various legal matters. \n Guide you through legal processes relevant to India. \n Provide information on your rights and responsibilities as per Indian legal standards. \n ⚖️ Disclaimer: \n While I can provide general information, it's essential to consult with a qualified Indian attorney for advice tailored to your specific situation. \n 🤖 Getting Started: \n Feel free to ask any legal question related to Indian law, using keywords like "property rights," "labor laws," or "family law." I'm here to assist you! \n Let's get started! How can I assist you today?  ")
 
 
 
