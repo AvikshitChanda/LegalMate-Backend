@@ -85,31 +85,31 @@ def on_click_callback():
 
 initialize_session_state()
 
- st.title("LegalEase Advisor Chatbot")
+st.title("LegalEase Advisor Chatbot 🇮🇳")
 
-    st.markdown(
-        """
-        👋 **Namaste! Welcome to LegalEase Advisor!**
+st.markdown(
+    """
+    👋 **Namaste! Welcome to LegalEase Advisor!**
 
-        I'm here to assist you with your legal queries within the framework of Indian law. Whether you're navigating through specific legal issues or seeking general advice, I'm here to help.
+    I'm here to assist you with your legal queries within the framework of Indian law. Whether you're navigating through specific legal issues or seeking general advice, I'm here to help.
 
-        📚 **How I Can Assist:**
-        - Answer questions on various aspects of Indian law.
-        - Guide you through legal processes relevant to India.
-        - Provide information on your rights and responsibilities as per Indian legal standards.
+    📚 **How I Can Assist:**
+    - Answer questions on various aspects of Indian law.
+    - Guide you through legal processes relevant to India.
+    - Provide information on your rights and responsibilities as per Indian legal standards.
 
-        🔐 **Privacy & Security:**
-        Rest assured, your privacy is of utmost importance. All interactions are confidential and secure. No personal details are stored unless you choose to create an account.
+    🔐 **Privacy & Security:**
+    Rest assured, your privacy is of utmost importance. All interactions are confidential and secure. No personal details are stored unless you choose to create an account.
 
-        ⚖️ **Disclaimer:**
-        While I can provide general information, it's essential to consult with a qualified Indian attorney for advice tailored to your specific situation.
+    ⚖️ **Disclaimer:**
+    While I can provide general information, it's essential to consult with a qualified Indian attorney for advice tailored to your specific situation.
 
-        🤖 **Getting Started:**
-        Feel free to ask any legal question related to Indian law, using keywords like "property rights," "labor laws," or "family law." I'm here to assist you!
+    🤖 **Getting Started:**
+    Feel free to ask any legal question related to Indian law, using keywords like "property rights," "labor laws," or "family law." I'm here to assist you!
 
-        Let's get started! How can I assist you today?
-        """
-    )
+    Let's get started! How can I assist you today?
+    """
+)
 
 
 
