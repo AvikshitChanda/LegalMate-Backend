@@ -85,7 +85,12 @@ def on_click_callback():
 
 initialize_session_state()
 
-st.title("Hello I am here to give you legal advice ⚖️")
+st.title("👋 Welcome to LegalEase Advisor! \n I'm here to help you navigate through legal questions and concerns. Whether you're seeking information about a specific legal topic or need general advice, I'm at your service.")
+
+
+
+
+
 
 chat_placeholder = st.container()
 prompt_placeholder = st.form("chat-form")
