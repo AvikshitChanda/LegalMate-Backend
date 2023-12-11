@@ -77,10 +77,10 @@ def on_click_callback():
     )
     llm_response = response['result']
     st.session_state.history.append(
-        Message("👤 human", human_prompt)
+        Message("👤 Human", human_prompt)
     )
     st.session_state.history.append(
-        Message("👨🏻‍⚖️ ai", llm_response)
+        Message("👨🏻‍⚖️ Ai", llm_response)
     )
 
 
