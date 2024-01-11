@@ -65,7 +65,8 @@ def initialize_session_state():
                                                       retriever=docsearch.as_retriever(
                                                           search_kwargs={'k': 2}),
                                                       return_source_documents=True,
-                                                      chain_type_kwargs=chain_type_kwargs)
+                                                      chain_type_kwargs=chain_type_kwargs,
+                                                      rephrase_question=False)
 
         st.session_state.conversation = retrieval_chain
 
