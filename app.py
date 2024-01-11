@@ -8,7 +8,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 import pinecone
 from langchain.vectorstores import Pinecone
 from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA, ConversationalRetrievalChain
+from langchain.chains import RetrievalQA
 import streamlit.components.v1 as components
 import time
 
@@ -60,7 +60,7 @@ def initialize_session_state():
 
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
         chain_type_kwargs = {"prompt": PROMPT}
-        retrieval_chain = ConversationalRetrievalChain.from_llm(llm=model,
+        retrieval_chain = RetrievalQA.from_chain_type(llm=model,
                                                       chain_type="stuff",
                                                       retriever=docsearch.as_retriever(
                                                           search_kwargs={'k': 2}),
