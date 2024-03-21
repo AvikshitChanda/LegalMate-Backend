@@ -10,6 +10,7 @@ from langchain.vectorstores import Pinecone
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 import streamlit.components.v1 as components
+from langchain_groq import ChatGroq
 import time
 
 HUGGINGFACEHUB_API_TOKEN = st.secrets['HUGGINGFACEHUB_API_TOKEN']
@@ -35,6 +36,7 @@ def initialize_session_state():
     if "conversation" not in st.session_state:
         llama = LlamaAPI(st.secrets["LlamaAPI"])
         model = ChatLlamaAPI(client=llama)
+        chat = ChatGroq(temperature=0, groq_api_key=st.secrets["Groq_api"], model_name="mixtral-8x7b-32768")
 
         embeddings = download_hugging_face_embeddings()
 
@@ -60,7 +62,7 @@ def initialize_session_state():
 
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
         chain_type_kwargs = {"prompt": PROMPT}
-        retrieval_chain = RetrievalQA.from_chain_type(llm=model,
+        retrieval_chain = RetrievalQA.from_chain_type(llm=chat,
                                                       chain_type="stuff",
                                                       retriever=docsearch.as_retriever(
                                                           search_kwargs={'k': 2}),
