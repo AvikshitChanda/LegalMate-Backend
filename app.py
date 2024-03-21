@@ -11,12 +11,11 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 import streamlit.components.v1 as components
 from langchain_groq import ChatGroq
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ChatMessageHistory, ConversationBufferMemory
 import time
 
 HUGGINGFACEHUB_API_TOKEN = st.secrets['HUGGINGFACEHUB_API_TOKEN']
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = HUGGINGFACEHUB_API_TOKEN
-speed = 10
-
 
 @dataclass
 class Message:
@@ -36,7 +35,7 @@ def initialize_session_state():
     if "conversation" not in st.session_state:
         llama = LlamaAPI(st.secrets["LlamaAPI"])
         model = ChatLlamaAPI(client=llama)
-        chat = ChatGroq(temperature=0, groq_api_key=st.secrets["Groq_api"], model_name="mixtral-8x7b-32768")
+        chat = ChatGroq(temperature=0.5, groq_api_key=st.secrets["Groq_api"], model_name="mixtral-8x7b-32768")
 
         embeddings = download_hugging_face_embeddings()
 
@@ -61,13 +60,22 @@ def initialize_session_state():
             """
 
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-        chain_type_kwargs = {"prompt": PROMPT}
-        retrieval_chain = RetrievalQA.from_chain_type(llm=chat,
+        
+        #chain_type_kwargs = {"prompt": PROMPT}
+        message_history = ChatMessageHistory()
+        memory = ConversationBufferMemory(
+            memory_key="chat_history",
+            output_key="answer",
+            chat_memory=message_history,
+            return_messages=True,
+            )
+        retrieval_chain = ConversationalRetrievalChain.from_llm(llm=chat,
                                                       chain_type="stuff",
                                                       retriever=docsearch.as_retriever(
                                                           search_kwargs={'k': 2}),
                                                       return_source_documents=True,
-                                                      chain_type_kwargs=chain_type_kwargs,
+                                                      combine_docs_chain_kwargs={"prompt": PROMPT},
+                                                      memory= memory
                                                      )
 
         st.session_state.conversation = retrieval_chain
@@ -78,7 +86,7 @@ def on_click_callback():
     response = st.session_state.conversation(
         human_prompt
     )
-    llm_response = response['result']
+    llm_response = response['answer']
     st.session_state.history.append(
         Message("👤 Human", human_prompt)
     )
