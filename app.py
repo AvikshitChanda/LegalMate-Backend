@@ -83,6 +83,7 @@ def initialize_session_state():
 
 def on_click_callback():
     human_prompt = st.session_state.human_prompt
+    st.session_state.human_prompt=""
     response = st.session_state.conversation(
         human_prompt
     )
