@@ -139,9 +139,11 @@ with chat_placeholder.container():
 def on_input_change():
     user_input = st.session_state.user_input
     st.session_state.past.append(user_input)
+    response = st.session_state.conversation(human_prompt)
+    llm_response = response['answer']
     st.session_state.generated.append({"type": "normal", "data": f"The message from Bot\nWith new line\n{user_input}"})
     st.session_state.history.append(Message("👤 Human", user_input))
-    st.session_state.history.append(Message("👨🏻‍⚖️ Ai", f"The message from Bot\nWith new line\n{user_input}"))
+    st.session_state.history.append(Message("👨🏻‍⚖️ Ai", f"The message from Bot\nWith new line\n{llm_response}"))
 
 def on_btn_click():
     del st.session_state.past[:]
