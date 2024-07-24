@@ -1,6 +1,8 @@
+import streamlit as st
+from streamlit_chat import message
+from streamlit.components.v1 import html
 from dataclasses import dataclass
 from typing import Literal
-import streamlit as st
 import os
 from llamaapi import LlamaAPI
 from langchain_experimental.llms import ChatLlamaAPI
@@ -9,7 +11,6 @@ import pinecone
 from langchain.vectorstores import Pinecone
 from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
-import streamlit.components.v1 as components
 from langchain_groq import ChatGroq
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ChatMessageHistory, ConversationBufferMemory
@@ -63,7 +64,6 @@ def initialize_session_state():
 
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
         
-        #chain_type_kwargs = {"prompt": PROMPT}
         message_history = ChatMessageHistory()
         memory = ConversationBufferMemory(
             memory_key="chat_history",
@@ -85,17 +85,11 @@ def initialize_session_state():
 
 def on_click_callback():
     human_prompt = st.session_state.human_prompt
-    st.session_state.human_prompt=""
-    response = st.session_state.conversation(
-        human_prompt
-    )
+    st.session_state.human_prompt = ""
+    response = st.session_state.conversation(human_prompt)
     llm_response = response['answer']
-    st.session_state.history.append(
-        Message("👤 Human", human_prompt)
-    )
-    st.session_state.history.append(
-        Message("👨🏻‍⚖️ Ai", llm_response)
-    )
+    st.session_state.history.append(Message("👤 Human", human_prompt))
+    st.session_state.history.append(Message("👨🏻‍⚖️ Ai", llm_response))
 
 
 initialize_session_state()
@@ -120,28 +114,40 @@ st.markdown(
     🤖 **Getting Started:**
     
     Feel free to ask any legal question related to Indian law, using keywords like "property rights," "labor laws," or "family law." I'm here to assist you!
-
     Let's get started! How can I assist you today?
     """
 )
 
-chat_placeholder = st.container()
-prompt_placeholder = st.form("chat-form")
+if "history" not in st.session_state:
+    st.session_state.history = []
 
-with chat_placeholder:
-    for chat in st.session_state.history:
-        st.markdown(f"{chat.origin} : {chat.message}")
+if "generated" not in st.session_state:
+    st.session_state.generated = []
 
-with prompt_placeholder:
-    st.markdown("**Chat**")
-    cols = st.columns((6, 1))
-    cols[0].text_input(
-        "Chat",
-        label_visibility="collapsed",
-        key="human_prompt",
-    )
-    cols[1].form_submit_button(
-        "Submit",
-        type="primary",
-        on_click=on_click_callback,
-    )
+if "past" not in st.session_state:
+    st.session_state.past = []
+
+chat_placeholder = st.empty()
+
+with chat_placeholder.container():
+    for i, chat in enumerate(st.session_state.history):
+        if chat.origin == "👤 Human":
+            message(chat.message, is_user=True, key=f"{i}_user")
+        else:
+            message(chat.message, key=f"{i}")
+
+def on_input_change():
+    user_input = st.session_state.user_input
+    st.session_state.past.append(user_input)
+    st.session_state.generated.append({"type": "normal", "data": f"The message from Bot\nWith new line\n{user_input}"})
+    st.session_state.history.append(Message("👤 Human", user_input))
+    st.session_state.history.append(Message("👨🏻‍⚖️ Ai", f"The message from Bot\nWith new line\n{user_input}"))
+
+def on_btn_click():
+    del st.session_state.past[:]
+    del st.session_state.generated[:]
+    del st.session_state.history[:]
+
+with st.container():
+    st.text_input("User Input:", on_change=on_input_change, key="user_input")
+    st.button("Clear message", on_click=on_btn_click)
