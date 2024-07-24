@@ -139,7 +139,7 @@ with chat_placeholder.container():
 def on_input_change():
     user_input = st.session_state.user_input
     st.session_state.past.append(user_input)
-    response = st.session_state.conversation(human_prompt)
+    response = st.session_state.conversation(user_input)
     llm_response = response['answer']
     st.session_state.generated.append({"type": "normal", "data": f"The message from Bot\nWith new line\n{user_input}"})
     st.session_state.history.append(Message("👤 Human", user_input))
