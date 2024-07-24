@@ -143,7 +143,7 @@ def on_input_change():
     llm_response = response['answer']
     st.session_state.generated.append({"type": "normal", "data": f"The message from Bot\nWith new line\n{user_input}"})
     st.session_state.history.append(Message("👤 Human", user_input))
-    st.session_state.history.append(Message("👨🏻‍⚖️ Ai", f"The message from Bot\nWith new line\n{llm_response}"))
+    st.session_state.history.append(Message("👨🏻‍⚖️ Ai", llm_response"))
 
 def on_btn_click():
     del st.session_state.past[:]
