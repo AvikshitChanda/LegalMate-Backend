@@ -1,52 +1,47 @@
 from dataclasses import dataclass
 from typing import Literal
-import streamlit as st
-import os
+from flask_cors import CORS
+
+from flask import Flask, request, jsonify
 from llamaapi import LlamaAPI
 from langchain_experimental.llms import ChatLlamaAPI
 from langchain.embeddings import HuggingFaceEmbeddings
-import pinecone
-from langchain.vectorstores import Pinecone
+from langchain.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
-import streamlit.components.v1 as components
-from langchain_groq import ChatGroq
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ChatMessageHistory, ConversationBufferMemory
-import time
+from langchain_groq import ChatGroq
 
-HUGGINGFACEHUB_API_TOKEN = st.secrets['HUGGINGFACEHUB_API_TOKEN']
-
+app = Flask(__name__)
+CORS(app)
 @dataclass
 class Message:
     """Class for keeping track of a chat message."""
     origin: Literal["👤 Human", "👨🏻‍⚖️ Ai"]
     message: str
 
-
 def download_hugging_face_embeddings():
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
     return embeddings
 
-
+# Initialize the session state
 def initialize_session_state():
-    if "history" not in st.session_state:
-        st.session_state.history = []
-    if "conversation" not in st.session_state:
-        llama = LlamaAPI(st.secrets["LlamaAPI"])
+    if "history" not in app.config:
+        app.config["history"] = []
+    if "conversation" not in app.config:
+        llama = LlamaAPI("d9f5e52518c6432f9c568a308d17554b767f2543a040477d9888bf9704d4d065")
         model = ChatLlamaAPI(client=llama)
-        chat = ChatGroq(temperature=0.5, groq_api_key=st.secrets["Groq_api"], model_name="mixtral-8x7b-32768")
+        chat = ChatGroq(temperature=0.5, groq_api_key="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", model_name="mixtral-8x7b-32768")
 
         embeddings = download_hugging_face_embeddings()
 
-        # Initializing the Pinecone
-        pinecone.init(
-            api_key=st.secrets["PINECONE_API_KEY"],  # find at app.pinecone.io
-            environment=st.secrets["PINECONE_API_ENV"]  # next to api key in console
+        # Initialize ChromaDB from persisted directory
+        persist_directory = "chroma-db"  # This is the folder where Chroma will store and load data
+        chroma_client = Chroma(
+            collection_name="legal-advisor",
+            embedding_function=embeddings,
+            persist_directory=persist_directory
         )
-        index_name = "legal-advisor"  # put in the name of your pinecone index here
-
-        docsearch = Pinecone.from_existing_index(index_name, embeddings)
 
         prompt_template = """
             You are a trained bot to guide people about Indian Law. You will answer user's query with your knowledge and the context provided. 
@@ -59,88 +54,54 @@ def initialize_session_state():
             Question: {question}
             Only return the helpful answer below and nothing else.
             Helpful answer:
-            """
+        """
 
         PROMPT = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-        
-        #chain_type_kwargs = {"prompt": PROMPT}
+
+        # Initialize the retrieval chain with memory
         message_history = ChatMessageHistory()
         memory = ConversationBufferMemory(
             memory_key="chat_history",
             output_key="answer",
             chat_memory=message_history,
             return_messages=True,
-            )
-        retrieval_chain = ConversationalRetrievalChain.from_llm(llm=chat,
-                                                      chain_type="stuff",
-                                                      retriever=docsearch.as_retriever(
-                                                          search_kwargs={'k': 2}),
-                                                      return_source_documents=True,
-                                                      combine_docs_chain_kwargs={"prompt": PROMPT},
-                                                      memory= memory
-                                                     )
+        )
 
-        st.session_state.conversation = retrieval_chain
+        # Create the retrieval chain
+        retrieval_chain = ConversationalRetrievalChain.from_llm(
+            llm=chat,
+            chain_type="stuff",
+            retriever=chroma_client.as_retriever(search_kwargs={'k': 2}),
+            return_source_documents=True,
+            combine_docs_chain_kwargs={"prompt": PROMPT},
+            memory=memory
+        )
 
-
-def on_click_callback():
-    human_prompt = st.session_state.human_prompt
-    st.session_state.human_prompt=""
-    response = st.session_state.conversation(
-        human_prompt
-    )
-    llm_response = response['answer']
-    st.session_state.history.append(
-        Message("👤 Human", human_prompt)
-    )
-    st.session_state.history.append(
-        Message("👨🏻‍⚖️ Ai", llm_response)
-    )
-
+        app.config["conversation"] = retrieval_chain
 
 initialize_session_state()
 
-st.title("LegalEase Advisor Chatbot 🇮🇳")
+@app.route('/ask', methods=['POST'])
+def ask_question():
+    data = request.json
+    human_prompt = data.get('question', '')
+    
+    if not human_prompt:
+        return jsonify({"error": "No question provided"}), 400
 
-st.markdown(
-    """
-    👋 **Namaste! Welcome to LegalEase Advisor!**
-    I'm here to assist you with your legal queries within the framework of Indian law. Whether you're navigating through specific legal issues or seeking general advice, I'm here to help.
+    # Get response from the conversation chain
+    response = app.config["conversation"](human_prompt)
+    llm_response = response['answer']
     
-    📚 **How I Can Assist:**
-    
-    - Answer questions on various aspects of Indian law.
-    - Guide you through legal processes relevant to India.
-    - Provide information on your rights and responsibilities as per Indian legal standards.
-    
-    ⚖️ **Disclaimer:**
-    
-    While I can provide general information, it's essential to consult with a qualified Indian attorney for advice tailored to your specific situation.
-    
-    🤖 **Getting Started:**
-    
-    Feel free to ask any legal question related to Indian law, using keywords like "property rights," "labor laws," or "family law." I'm here to assist you!
-    Let's get started! How can I assist you today?
-    """
-)
-
-chat_placeholder = st.container()
-prompt_placeholder = st.form("chat-form")
-
-with chat_placeholder:
-    for chat in st.session_state.history:
-        st.markdown(f"{chat.origin} : {chat.message}")
-
-with prompt_placeholder:
-    st.markdown("**Chat**")
-    cols = st.columns((6, 1))
-    cols[0].text_input(
-        "Chat",
-        label_visibility="collapsed",
-        key="human_prompt",
+    # Update history
+    app.config["history"].append(
+        Message("👤 Human", human_prompt)
     )
-    cols[1].form_submit_button(
-        "Submit",
-        type="primary",
-        on_click=on_click_callback,
+    app.config["history"].append(
+        Message("👨🏻‍⚖️ Ai", llm_response)
     )
+
+    return jsonify({"answer": llm_response})
+
+if __name__ == "__main__":
+    app.run(debug=True)
